@@ -1,6 +1,4 @@
-# Creating a README.md file with the generated content
-
-readme_content = """# 🌍 GeoVest - Real-Time GPS Vest Tracking  
+# 🌍 GeoVest - Real-Time GPS Vest Tracking  
 
 GeoVest is an **IoT-based GPS tracking system** that integrates **ESP32-powered vests** with a **real-time web application**. Designed for **live tracking**, it helps monitor the location of personnel using a **GY-NEO6MV2 GPS module** and **Leaflet.js map visualization**.  
 
