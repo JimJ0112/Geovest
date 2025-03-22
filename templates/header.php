@@ -18,6 +18,9 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+
+    <script type="module" src="https://unpkg.com/@google/model-viewer@latest"></script>
+
     <style>
         #map {
             height: 500px;

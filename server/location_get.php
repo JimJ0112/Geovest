@@ -2,8 +2,9 @@
 require_once('database.php');
 require_once('helpers/ajax_result.php');
 
-$vest_id = $_POST['vest_num'];
+//$vest_id = $_POST['vest_num'];
 
+$vest_id = 1;
 
 $result = $conn->query("SELECT vest_id, latitude, longitude, location_name FROM vest_locations WHERE vest_id = $vest_id ORDER BY id LIMIT 1");
 

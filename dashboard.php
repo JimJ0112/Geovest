@@ -3,13 +3,20 @@ include_once('templates/header.php');
 include_once('templates/navbar.php');
 include_once('templates/sidebar.php');
 ?>
-
+<style>
+    ul,
+    li {
+        list-style-type: none;
+        text-decoration: none;
+    }
+</style>
 <div class="content-wrapper">
     <div class="row m-4 card">
         <div class="col">
             <h3 class="m-auto"> Vests </h3>
-            <ul>
-                <li>Vest 1</li>
+
+            <ul style="list-style-type: type none;">
+                <li> <img src="resources/imgs/vest_icon.png" alt="" style="width: 50px; height:50px;">Vest 1</li>
             </ul>
         </div>
 
@@ -20,7 +27,9 @@ include_once('templates/sidebar.php');
 </div>
 
 <script>
-    var map = L.map('map').setView([51.505, -0.09], 20); // High zoom level
+    var map = L.map('map', {
+        fullscreenControl: true
+    }).setView([51.505, -0.09], 20); // High zoom level
 
     // 🗺️ Base Layers
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -94,7 +103,7 @@ include_once('templates/sidebar.php');
         })
     ]);
 
-
+    // 🗺️ Layer Control
     var baseMaps = {
         "OpenStreetMap": osm,
         "Google Satellite": satellite,
@@ -125,6 +134,8 @@ include_once('templates/sidebar.php');
     map.on('zoomend', function() {
         userZoomLevel = map.getZoom();
     });
+
+
 
     function get_location() {
         $.ajax({
@@ -169,8 +180,7 @@ include_once('templates/sidebar.php');
     }
 
     // Fetch location every 5 seconds
-
-    setInterval(get_location, 5000);
+    setInterval(get_location, 1000);
     get_location();
 </script>
 
