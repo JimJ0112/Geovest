@@ -20,21 +20,110 @@ include_once('templates/sidebar.php');
 </div>
 
 <script>
-    var map = L.map('map').setView([51.505, -0.09], 13); // Initial map setup
+    var map = L.map('map').setView([51.505, -0.09], 20); // High zoom level
 
-    // Add OpenStreetMap layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'powered by <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+    // 🗺️ Base Layers
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'OpenStreetMap contributors',
+        maxZoom: 24
     }).addTo(map);
 
-    var marker = null; // Store marker reference
-    var lastLat = null,
-        lastLng = null; // Store last known location
-    var userZoomLevel = map.getZoom(); // Store user-defined zoom level
+    var satellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: 'Google Satellite',
+        maxZoom: 24
+    });
 
-    // Detect user zoom changes
+    var terrain = L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: 'Google Terrain',
+        maxZoom: 24
+    });
+
+    var cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: 'CartoDB Dark Mode',
+        maxZoom: 24
+    });
+
+    var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'ESRI Satellite',
+        maxZoom: 24
+    });
+
+    // 📌 Overlays
+    var markerLayer = L.layerGroup().addTo(map); // ✅ Always visible for tracking markers
+
+    var polygonLayer = L.polygon([
+        [51.51, -0.12],
+        [51.51, -0.08],
+        [51.505, -0.06]
+    ], {
+        color: 'red'
+    });
+
+    var circleMarkerLayer = L.circleMarker([51.505, -0.09], {
+        color: 'blue',
+        radius: 10
+    }).bindPopup("Circle Marker");
+
+    // ➰ Route Polyline Example
+    var routePolyline = L.polyline([
+        [51.505, -0.09],
+        [51.51, -0.08],
+        [51.515, -0.09]
+    ], {
+        color: 'purple'
+    }).bindPopup("Route Path");
+
+    // 🔥 Simulated Heatmap (Using featureGroup instead of heatLayer)
+    var heatmapLayer = L.featureGroup([
+        L.circle([51.505, -0.09], {
+            radius: 50,
+            color: "red",
+            fillOpacity: 0.5
+        }),
+        L.circle([51.51, -0.1], {
+            radius: 70,
+            color: "orange",
+            fillOpacity: 0.5
+        }),
+        L.circle([51.51, -0.08], {
+            radius: 90,
+            color: "yellow",
+            fillOpacity: 0.5
+        })
+    ]);
+
+
+    var baseMaps = {
+        "OpenStreetMap": osm,
+        "Google Satellite": satellite,
+        "Google Terrain": terrain,
+        "Carto Dark Mode": cartoDark,
+        "ESRI Satellite": esriSatellite
+    };
+
+    var overlayMaps = {
+        "Current Location (Marker)": markerLayer,
+        "Polygon": polygonLayer,
+        "Circle Marker": circleMarkerLayer,
+        "Route Path": routePolyline,
+        "Heatmap Simulation": heatmapLayer
+    };
+
+    // ✅ Always Show Layer Control
+    L.control.layers(baseMaps, overlayMaps, {
+        collapsed: true
+    }).addTo(map);
+
+    // 📍 GPS Marker Logic
+    var marker = null;
+    var lastLat = null,
+        lastLng = null;
+    var userZoomLevel = map.getZoom();
+
     map.on('zoomend', function() {
-        userZoomLevel = map.getZoom(); // Save zoom level when user changes it
+        userZoomLevel = map.getZoom();
     });
 
     function get_location() {
@@ -57,16 +146,14 @@ include_once('templates/sidebar.php');
 
                     // If marker doesn't exist, create it
                     if (!marker) {
-                        marker = L.marker([lat, lng]).addTo(map)
+                        marker = L.marker([lat, lng]).addTo(markerLayer)
                             .bindPopup("Current Location").openPopup();
                     } else {
-                        // Smoothly move marker instead of re-adding
                         marker.setLatLng([lat, lng]);
                     }
 
-                    // Only move the map if location changed significantly
                     if (lastLat === null || lastLng === null || Math.abs(lastLat - lat) > 0.0001 || Math.abs(lastLng - lng) > 0.0001) {
-                        map.setView([lat, lng], userZoomLevel); // Preserve user zoom
+                        map.setView([lat, lng], userZoomLevel);
                     }
 
                     lastLat = lat;
@@ -82,9 +169,8 @@ include_once('templates/sidebar.php');
     }
 
     // Fetch location every 5 seconds
-    setInterval(get_location, 5000);
 
-    // Initial fetch
+    setInterval(get_location, 5000);
     get_location();
 </script>
 
