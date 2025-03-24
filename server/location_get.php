@@ -1,12 +1,16 @@
 <?php
 require_once('database.php');
 require_once('helpers/ajax_result.php');
+require_once('helpers/cors_helper.php');
 
-//$vest_id = $_POST['vest_num'];
 
-$vest_id = 1;
+$vest_id = $_POST['vest_num'];
 
-$result = $conn->query("SELECT vest_id, latitude, longitude, location_name FROM vest_locations WHERE vest_id = $vest_id ORDER BY id LIMIT 1");
+//$vest_id = 1;
+
+$result = $conn->query("SELECT vest_locations.id, vest_locations.vest_id, vest_locations.latitude, vest_locations.longitude, vest_locations.location_name, vest_locations.heart_rate, vests.id as vests_vest_id, vests.vest_number  FROM vest_locations 
+LEFT JOIN vests ON vest_locations.vest_id = vests.id
+WHERE vest_locations.vest_id = $vest_id ORDER BY vest_locations.id LIMIT 1");
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {

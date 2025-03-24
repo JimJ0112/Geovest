@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 22, 2025 at 09:02 AM
+-- Generation Time: Mar 24, 2025 at 01:10 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -52,15 +52,17 @@ CREATE TABLE `vest_locations` (
   `vest_id` int(11) NOT NULL,
   `latitude` varchar(255) NOT NULL,
   `longitude` varchar(255) NOT NULL,
-  `location_name` varchar(255) NOT NULL
+  `location_name` varchar(255) NOT NULL,
+  `heart_rate` varchar(255) NOT NULL,
+  `datetime` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `vest_locations`
 --
 
-INSERT INTO `vest_locations` (`id`, `vest_id`, `latitude`, `longitude`, `location_name`) VALUES
-(1, 1, '0.000000', '0.000000', 'ph');
+INSERT INTO `vest_locations` (`id`, `vest_id`, `latitude`, `longitude`, `location_name`, `heart_rate`, `datetime`) VALUES
+(1, 1, '14.747969', '120.527275', 'ph', '0', '2025-03-23 00:00:00');
 
 --
 -- Indexes for dumped tables

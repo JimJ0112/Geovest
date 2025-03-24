@@ -18,8 +18,13 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
 
     <script type="module" src="https://unpkg.com/@google/model-viewer@latest"></script>
+
+    <link rel="manifest" href="/Geovest/manifest.json">
+
+
 
     <style>
         #map {
@@ -30,4 +35,16 @@
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed" style="overflow: hidden;">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }).catch(function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
+    </script>
+
     <div class="wrapper">

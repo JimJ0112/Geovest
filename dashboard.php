@@ -16,7 +16,7 @@ include_once('templates/sidebar.php');
             <h3 class="m-auto"> Vests </h3>
 
             <ul style="list-style-type: type none;">
-                <li> <img src="resources/imgs/vest_icon.png" alt="" style="width: 50px; height:50px;">Vest 1</li>
+                <li> <img src="resources/imgs/vest_icon.png" alt="" style="width: 50px; height:50px;"> Vest 1 <br /> <img src="resources/imgs/heartbeat.gif" style="width:50px;height:50px;" /> Heart Rate: <span id="vest_heartrate"> </span> </li>
             </ul>
         </div>
 
@@ -29,7 +29,7 @@ include_once('templates/sidebar.php');
 <script>
     var map = L.map('map', {
         fullscreenControl: true
-    }).setView([51.505, -0.09], 20); // High zoom level
+    }).setView([51.505, -0.09], 5); // High zoom level
 
     // 🗺️ Base Layers
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -138,6 +138,7 @@ include_once('templates/sidebar.php');
 
 
     function get_location() {
+        let vest_heartrate = document.getElementById('vest_heartrate');
         $.ajax({
             url: 'http://localhost/Geovest/server/location_get.php',
             method: 'POST',
@@ -158,7 +159,7 @@ include_once('templates/sidebar.php');
                     // If marker doesn't exist, create it
                     if (!marker) {
                         marker = L.marker([lat, lng]).addTo(markerLayer)
-                            .bindPopup("Current Location").openPopup();
+                            .bindPopup(response.data[0].vest_number).openPopup();
                     } else {
                         marker.setLatLng([lat, lng]);
                     }
@@ -167,6 +168,7 @@ include_once('templates/sidebar.php');
                         map.setView([lat, lng], userZoomLevel);
                     }
 
+                    vest_heartrate.innerText = response.data[0].heart_rate;
                     lastLat = lat;
                     lastLng = lng;
                 } else {
