@@ -168,7 +168,16 @@ include_once('templates/sidebar.php');
                         map.setView([lat, lng], userZoomLevel);
                     }
 
-                    vest_heartrate.innerText = response.data[0].heart_rate;
+                    let heart_rate_display = "";
+
+                    if (response.data[0].heart_rate == 4095) {
+                        heart_rate_display = "Normal";
+                    } else {
+                        heart_rate_display = "No readings";
+                    }
+                    // vest_heartrate.innerText = response.data[0].heart_rate;
+                    vest_heartrate.innerText = heart_rate_display;
+
                     lastLat = lat;
                     lastLng = lng;
                 } else {

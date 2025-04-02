@@ -1,10 +1,26 @@
+/*!
+ * @file  heartrateAnalogMode.h
+ * @brief  This is written for the heart rate sensor the company library. Mainly used for real 
+ * @n  time measurement of blood oxygen saturation, based on measured values calculate heart rate values.
+ * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
+ * @license  The MIT License (MIT)
+ * @author  [linfeng](Musk.lin@dfrobot.com)
+ * @maintainer  [qsjhyy](yihuan.huang@dfrobot.com)
+ * @version  V1.0
+ * @date  2022-04-26
+ * @url  https://github.com/DFRobot/DFRobot_Heartrate
+ */
+
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <TinyGPS++.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <DFRobot_Heartrate.h>
+
+#include "DFRobot_Heartrate.h"
+#define heartratePin 35
+
 
 // WiFi Credentials
 const char* ssid = "PLDTHOMEFIBR250c0";
@@ -24,32 +40,23 @@ HardwareSerial neogps(1); // UART1 for GPS
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 
-const int ledPin = 2; 
 
-#define heartratePin A0
 
-// Create an instance of the Heartrate library
-DFRobot_Heartrate heartrate(DIGITAL_MODE);   // ANALOG_MODE or DIGITAL_MODE
-
+#define heartratePin 35
 
 
 void setup() {
-    Serial.begin(115200);
+  Serial.begin(115200);
     neogps.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
-
-    pinMode(ledPin, OUTPUT);
-    digitalWrite(ledPin, LOW); 
-
-  
   
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
         Serial.println("SSD1306 allocation failed");
         while (true);
     }
 
-    displayMessage("Starting ESP32...");    
+     
     Serial.println("Connecting to WiFi...");
-    displayMessage("Connecting to WiFi...");
+    
 
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -57,38 +64,40 @@ void setup() {
         Serial.print(".");
     }
     Serial.println("\nConnected to WiFi!");
-    displayMessage("WiFi Connected!");
+
 }
 
 void loop() {
+
+  float latitude =  0.00;
+  float longitude = 0.00;
+  int vestNum = 1;
+  String locationName = "ph";
+
+
     while (neogps.available()) {
         gps.encode(neogps.read()); 
     }
 
-   
-    float latitude = gps.location.isValid() ? gps.location.lat() : 0.00;
-    float longitude = gps.location.isValid() ? gps.location.lng() : 0.00;
-    int vestNum = 1;
-    String locationName = "ph";
+    latitude = gps.location.isValid() ? gps.location.lat() : 0.00;
+    longitude = gps.location.isValid() ? gps.location.lng() : 0.00;
 
+  int heartValue = analogRead(heartratePin);
+  Serial.println(heartValue);
 
-    // Get the heart rate value
-  uint8_t rateValue;
-  heartrate.getValue(heartratePin);   // A1 foot sampled values
-  rateValue = heartrate.getRate();   // Get heart rate value 
+  
+  String gpsData = "Lat: " + String(latitude, 6) + "\n Lng: " + String(longitude, 6) + "\n HeartRate: " + String(heartValue);
 
+  sendGPSData(vestNum, locationName, latitude, longitude, heartValue);
+  Serial.println(gpsData);
+  displayMessage(gpsData);
 
-    String gpsData = "Lat: " + String(latitude, 6) + "\n Lng: " + String(longitude, 6) + "\n HeartRate: " + rateValue;
-    Serial.println(gpsData);
-    displayMessage(gpsData);
-    Serial.println(rateValue);
+  delay(20);  
 
-    sendGPSData(vestNum, locationName, latitude, longitude, rateValue);
-
-    delay(1000); // Update every 5 seconds
 }
 
-void sendGPSData(int vestNum, String locationName, float lat, float lng, uint8_t rate) {
+
+void sendGPSData(int vestNum, String locationName, float lat, float lng, int rate) {
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
         http.begin(serverUrl);
@@ -96,16 +105,14 @@ void sendGPSData(int vestNum, String locationName, float lat, float lng, uint8_t
 
         String postData = "lat=" + String(lat, 6) + "&lng=" + String(lng, 6) + "&vest_num=" + String(vestNum) + "&loc_name=" + locationName + "&hrate=" + String(rate);
         Serial.println("Sending: " + postData);
-        displayMessage("Sending: " + postData);
-
+       
         int httpResponseCode = http.POST(postData);
         String responseMsg = "HTTP Code: " + String(httpResponseCode);
         Serial.println(responseMsg);
-        //displayMessage(responseMsg);
         http.end();
     } else {
         Serial.println("WiFi Disconnected!");
-        displayMessage("WiFi Disconnected!");
+      
     }
 }
 
