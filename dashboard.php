@@ -176,7 +176,8 @@ include_once('templates/sidebar.php');
                         heart_rate_display = "No readings";
                     }
                     // vest_heartrate.innerText = response.data[0].heart_rate;
-                    vest_heartrate.innerText = heart_rate_display;
+                    //vest_heartrate.innerText = heart_rate_display;
+                    vest_heartrate.innerText = response.data[0].heart_rate;
 
                     lastLat = lat;
                     lastLng = lng;

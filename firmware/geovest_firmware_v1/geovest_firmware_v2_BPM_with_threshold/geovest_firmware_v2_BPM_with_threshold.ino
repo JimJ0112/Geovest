@@ -3,6 +3,7 @@
 #include <TinyGPS++.h>
 
 #define heartratePin 35
+#define PULSE_THRESHOLD 1000  // Adjust this threshold based on testing
 
 const char* ssid = "JG";
 const char* password = "#Jimgen52828378";
@@ -15,7 +16,7 @@ HardwareSerial neogps(1); // UART1 for GPS
 unsigned long startTime = 0;
 unsigned long lastPulseTime = 0;
 int pulseCount = 0;
-bool fingerPresent = false;
+bool aboveThreshold = false;  // Used for rising edge detection
 
 void setup() {
   Serial.begin(115200);
@@ -29,7 +30,7 @@ void setup() {
   }
   Serial.println("\nConnected to WiFi!");
 
-  startTime = millis(); // Start timer
+  startTime = millis(); // Start the 1-minute timer
 }
 
 void loop() {
@@ -48,21 +49,26 @@ void loop() {
     longitude = gps.location.lng();
   }
 
-  
+  // Heartbeat reading
   int reading = analogRead(heartratePin);
   unsigned long currentTime = millis();
 
-  if (reading == 4095) {
-    if (currentTime - lastPulseTime > 300) { // 300ms debounce
+  Serial.print("Raw sensor value: ");
+  Serial.println(reading);
+
+  // Rising edge detection: Only count a pulse when value crosses threshold from below
+  if (reading > PULSE_THRESHOLD) {
+    if (!aboveThreshold && (currentTime - lastPulseTime > 300)) {
       pulseCount++;
       lastPulseTime = currentTime;
       Serial.println("<3 Pulse detected");
     }
+    aboveThreshold = true;
   } else {
-    //Serial.println("Pulse not detected");
+    aboveThreshold = false;
   }
 
-  // check if 60 mins
+  // Check if a minute has passed
   if (currentTime - startTime >= 60000) {
     int currentBPM = 0;
 
@@ -74,18 +80,16 @@ void loop() {
       Serial.println("No pulse detected in last minute. BPM: 0");
     }
 
-   
+    // Send data after 1 minute and reset counters
     sendGPSData(vestNum, locationName, latitude, longitude, currentBPM);
 
-   
+    // Reset for the next 1-minute period
     pulseCount = 0;
     startTime = currentTime;
   }
 
   delay(10); // Sampling delay
 }
-
-
 
 
 void sendGPSData(int vestNum, String locationName, float lat, float lng, int rate) {

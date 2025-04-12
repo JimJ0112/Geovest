@@ -15,7 +15,6 @@ HardwareSerial neogps(1); // UART1 for GPS
 unsigned long startTime = 0;
 unsigned long lastPulseTime = 0;
 int pulseCount = 0;
-bool fingerPresent = false;
 
 void setup() {
   Serial.begin(115200);
@@ -38,7 +37,7 @@ void loop() {
   int vestNum = 1;
   String locationName = "ph";
 
-  // Read GPS data
+  // Read GPS
   while (neogps.available()) {
     gps.encode(neogps.read());
   }
@@ -48,45 +47,50 @@ void loop() {
     longitude = gps.location.lng();
   }
 
-  
+  // Heartbeat read
   int reading = analogRead(heartratePin);
   unsigned long currentTime = millis();
 
-  if (reading == 4095) {
-    if (currentTime - lastPulseTime > 300) { // 300ms debounce
+  if (reading >= 3800) { 
+    if (currentTime - lastPulseTime > 300) {
       pulseCount++;
       lastPulseTime = currentTime;
       Serial.println("<3 Pulse detected");
     }
-  } else {
-    //Serial.println("Pulse not detected");
+  }else{
+    //pulseCount = 0;
   }
 
-  // check if 60 mins
+  // Check if a minute has passed
   if (currentTime - startTime >= 60000) {
     int currentBPM = 0;
 
     if (pulseCount > 0) {
       currentBPM = pulseCount;
+
+
+      if(currentBPM > 150 ){
+        currentBPM = 150;
+      }else if(currentBPM < 0 ){
+        currentBPM = 0;
+      }
+
       Serial.print("BPM: ");
       Serial.println(currentBPM);
     } else {
       Serial.println("No pulse detected in last minute. BPM: 0");
     }
 
-   
+    
     sendGPSData(vestNum, locationName, latitude, longitude, currentBPM);
 
-   
+    // Reset
     pulseCount = 0;
     startTime = currentTime;
   }
 
-  delay(10); // Sampling delay
+  delay(10); 
 }
-
-
-
 
 void sendGPSData(int vestNum, String locationName, float lat, float lng, int rate) {
   if (WiFi.status() == WL_CONNECTED) {
