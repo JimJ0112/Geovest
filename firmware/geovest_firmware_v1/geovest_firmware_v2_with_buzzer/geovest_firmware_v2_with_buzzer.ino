@@ -3,6 +3,8 @@
 #include <TinyGPS++.h>
 
 #define heartratePin 35
+#define BUZZER_PIN 25
+#define BUTTON_PIN 14
 
 const char* ssid = "JG";
 const char* password = "#Jimgen52828378";
@@ -27,6 +29,9 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("\nConnected to WiFi!");
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP); // Button with internal pull-up
+  pinMode(BUZZER_PIN, OUTPUT);       // Buzzer output
 
   startTime = millis(); // Start timer
 }
@@ -57,8 +62,14 @@ void loop() {
       lastPulseTime = currentTime;
       Serial.println("<3 Pulse detected");
     }
-  }else{
-    //pulseCount = 0;
+  }
+
+  // Button check - beep when pressed
+  if (digitalRead(BUTTON_PIN) == LOW) { // Active low
+    Serial.println("Button pressed! Beep.");
+    tone(BUZZER_PIN, 1000); // 1kHz tone
+    delay(200);
+    noTone(BUZZER_PIN);
   }
 
   // Check if a minute has passed
@@ -68,10 +79,9 @@ void loop() {
     if (pulseCount > 0) {
       currentBPM = pulseCount;
 
-
       if(currentBPM > 200 ){
         currentBPM = 200;
-      }else if(currentBPM < 0 ){
+      } else if(currentBPM < 0 ){
         currentBPM = 0;
       }
 
@@ -81,7 +91,6 @@ void loop() {
       Serial.println("No pulse detected in last minute. BPM: 0");
     }
 
-    
     sendGPSData(vestNum, locationName, latitude, longitude, currentBPM);
 
     // Reset
@@ -89,7 +98,7 @@ void loop() {
     startTime = currentTime;
   }
 
-  delay(900); 
+  delay(50); // Quick loop for responsive button
 }
 
 void sendGPSData(int vestNum, String locationName, float lat, float lng, int rate) {

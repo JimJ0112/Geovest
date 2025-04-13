@@ -16,7 +16,10 @@ include_once('templates/sidebar.php');
             <h3 class="m-auto"> Vests </h3>
 
             <ul style="list-style-type: type none;">
-                <li> <img src="resources/imgs/vest_icon.png" alt="" style="width: 50px; height:50px;"> Vest 1 <br /> <img src="resources/imgs/heartbeat.gif" style="width:50px;height:50px;" /> Heart Rate: <span id="vest_heartrate"> </span> </li>
+                <li> <img src="resources/imgs/vest_icon.png" alt="" style="width: 50px; height:50px;"> Vest 1 </li>
+                <li> <img src="resources/imgs/heartbeat.gif" id="heartIcon" style="width:50px;height:50px;" /> Heart Rate: <span id="vest_heartrate"> </span> </li>
+                <li> Remarks: <span id="heartRateRemarks"> </spam>
+                </li>
             </ul>
         </div>
 
@@ -139,6 +142,8 @@ include_once('templates/sidebar.php');
 
     function get_location() {
         let vest_heartrate = document.getElementById('vest_heartrate');
+        let heartIcon = document.getElementById('heartIcon');
+        let heartRateRemarks = document.getElementById('heartRateRemarks');
         $.ajax({
             url: 'http://localhost/Geovest/server/location_get.php',
             method: 'POST',
@@ -172,11 +177,35 @@ include_once('templates/sidebar.php');
 
                     if (response.data[0].heart_rate == 4095) {
                         heart_rate_display = "Normal";
+
                     } else {
                         heart_rate_display = "No readings";
                     }
+
+
                     // vest_heartrate.innerText = response.data[0].heart_rate;
                     //vest_heartrate.innerText = heart_rate_display;
+
+
+                    let image = new Image();
+                    let remarks = "";
+                    if (response.data[0].heart_rate > 10) {
+                        image.src = "resources/imgs/heartbeat.gif";
+                        remarks = "Pulse detection stable";
+                    } else {
+                        image.src = "resources/imgs/heartbeat-static.png";
+                        remarks = "Pulse detection not stable";
+
+                    }
+
+                    if (heartIcon.src != image.src) {
+                        heartIcon.src = image.src;
+                    }
+
+                    heartRateRemarks.innerText = remarks;
+                    //heartIcon.src = image.src;
+
+
                     vest_heartrate.innerText = response.data[0].heart_rate;
 
                     lastLat = lat;
