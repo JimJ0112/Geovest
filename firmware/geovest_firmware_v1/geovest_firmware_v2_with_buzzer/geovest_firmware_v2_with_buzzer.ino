@@ -6,9 +6,11 @@
 #define BUZZER_PIN 25
 #define BUTTON_PIN 14
 
-const char* ssid = "JG";
-const char* password = "#Jimgen52828378";
-const char* serverUrl = "http://192.168.1.113/Geovest/server/location_saving.php";
+const char* ssid = "PLDTHOMEFIBR250c0";
+const char* password = "PLDTWIFIk72ge";
+const char* serverUrl = "http://192.168.1.17/Geovest/server/location_saving.php";
+//const char* serverUrl = "http://jlwebsites.42web.io/Geovest/server/location_saving.php";
+
 
 TinyGPSPlus gps;
 HardwareSerial neogps(1); // UART1 for GPS
@@ -68,7 +70,7 @@ void loop() {
   if (digitalRead(BUTTON_PIN) == LOW) { // Active low
     Serial.println("Button pressed! Beep.");
     tone(BUZZER_PIN, 1000); // 1kHz tone
-    delay(200);
+    delay(12000);
     noTone(BUZZER_PIN);
   }
 
@@ -106,6 +108,7 @@ void sendGPSData(int vestNum, String locationName, float lat, float lng, int rat
     HTTPClient http;
     http.begin(serverUrl);
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    
 
     String postData = "lat=" + String(lat, 6) + "&lng=" + String(lng, 6) +
                       "&vest_num=" + String(vestNum) + "&loc_name=" + locationName +
@@ -114,6 +117,7 @@ void sendGPSData(int vestNum, String locationName, float lat, float lng, int rat
 
     int httpResponseCode = http.POST(postData);
     Serial.println("HTTP Code: " + String(httpResponseCode));
+    Serial.println("\n Response: " + http.getString());
     http.end();
   } else {
     Serial.println("WiFi Disconnected!");

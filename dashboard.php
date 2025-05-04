@@ -145,7 +145,7 @@ include_once('templates/sidebar.php');
         let heartIcon = document.getElementById('heartIcon');
         let heartRateRemarks = document.getElementById('heartRateRemarks');
         $.ajax({
-            url: 'http://localhost/Geovest/server/location_get.php',
+            url: 'http://jlwebsites.42web.io/Geovest/server/location_get.php',
             method: 'POST',
             data: {
                 vest_num: 1
@@ -189,7 +189,7 @@ include_once('templates/sidebar.php');
 
                     let image = new Image();
                     let remarks = "";
-                    if (response.data[0].heart_rate > 10) {
+                    if (response.data[0].heart_rate > 59) {
                         image.src = "resources/imgs/heartbeat.gif";
                         remarks = "Pulse detection stable";
                     } else {
