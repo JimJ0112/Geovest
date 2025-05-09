@@ -3,10 +3,11 @@ require_once('database.php');
 require_once('helpers/ajax_result.php');
 require_once('helpers/cors_helper.php');
 
+header('Content-Type: application/json');
 
-$vest_id = $_POST['vest_num'];
+//$vest_id = $_POST['vest_num'];
 
-//$vest_id = 1;
+$vest_id = 1;
 
 $result = $conn->query("SELECT vest_locations.id, vest_locations.vest_id, vest_locations.latitude, vest_locations.longitude, vest_locations.location_name, vest_locations.heart_rate, vests.id as vests_vest_id, vests.vest_number  FROM vest_locations 
 LEFT JOIN vests ON vest_locations.vest_id = vests.id

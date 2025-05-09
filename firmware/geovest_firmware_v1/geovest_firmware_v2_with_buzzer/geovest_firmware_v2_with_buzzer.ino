@@ -6,10 +6,10 @@
 #define BUZZER_PIN 25
 #define BUTTON_PIN 14
 
-const char* ssid = "PLDTHOMEFIBR250c0";
-const char* password = "PLDTWIFIk72ge";
-const char* serverUrl = "http://192.168.1.17/Geovest/server/location_saving.php";
-//const char* serverUrl = "http://jlwebsites.42web.io/Geovest/server/location_saving.php";
+const char* ssid = "PLDTHOMEFIBRc8c80";
+const char* password = "PLDTWIFIb4k2s";
+//const char* serverUrl = "http://192.168.1.17/Geovest/server/location_saving.php";
+const char* serverUrl = "https://saddlebrown-parrot-470515.hostingersite.com/Geovest/server/location_saving.php";
 
 
 TinyGPSPlus gps;
@@ -19,6 +19,7 @@ HardwareSerial neogps(1); // UART1 for GPS
 unsigned long startTime = 0;
 unsigned long lastPulseTime = 0;
 int pulseCount = 0;
+int isEmergency = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -70,8 +71,9 @@ void loop() {
   if (digitalRead(BUTTON_PIN) == LOW) { // Active low
     Serial.println("Button pressed! Beep.");
     tone(BUZZER_PIN, 1000); // 1kHz tone
-    delay(12000);
-    noTone(BUZZER_PIN);
+    // delay(12000);
+    // noTone(BUZZER_PIN);
+    isEmergency = 1;
   }
 
   // Check if a minute has passed
@@ -93,17 +95,21 @@ void loop() {
       Serial.println("No pulse detected in last minute. BPM: 0");
     }
 
-    sendGPSData(vestNum, locationName, latitude, longitude, currentBPM);
+
+
+    sendGPSData(vestNum, locationName, latitude, longitude, currentBPM, isEmergency);
 
     // Reset
     pulseCount = 0;
     startTime = currentTime;
+    noTone(BUZZER_PIN);
+    isEmergency = 0;
   }
 
   delay(50); // Quick loop for responsive button
 }
 
-void sendGPSData(int vestNum, String locationName, float lat, float lng, int rate) {
+void sendGPSData(int vestNum, String locationName, float lat, float lng, int rate, int IsEmergency) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     http.begin(serverUrl);
@@ -112,7 +118,7 @@ void sendGPSData(int vestNum, String locationName, float lat, float lng, int rat
 
     String postData = "lat=" + String(lat, 6) + "&lng=" + String(lng, 6) +
                       "&vest_num=" + String(vestNum) + "&loc_name=" + locationName +
-                      "&hrate=" + String(rate);
+                      "&hrate=" + String(rate) + "&is_emergency=" + IsEmergency;
     Serial.println("Sending: " + postData);
 
     int httpResponseCode = http.POST(postData);
